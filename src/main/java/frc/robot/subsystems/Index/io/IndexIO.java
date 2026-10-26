@@ -18,5 +18,7 @@ public abstract class IndexIO extends IOBase{
     protected abstract double getHopperCurrent();
     protected abstract double getFeederCurrent();
 
+    protected abstract void setHopperVolt(double volt);
+    protected abstract void setFeederVolt(double volt);
 
 }
