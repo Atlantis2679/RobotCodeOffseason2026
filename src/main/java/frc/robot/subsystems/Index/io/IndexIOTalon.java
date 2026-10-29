@@ -2,6 +2,9 @@ package frc.robot.subsystems.Index.io;
 
 import com.ctre.phoenix6.hardware.TalonFX;
 
+import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.motorcontrol.Talon;
 import frc.robot.RobotMap;
 import team2679.atlantiskit.logfields.LogFieldsTable;
@@ -16,22 +19,22 @@ public class IndexIOTalon extends IndexIO{
     }
 
     @Override
-    protected double getHopperCurrent() {
-        return hopperMotor.getSupplyCurrent().getValueAsDouble();
+    protected Current getHopperCurrent() {
+        return hopperMotor.getSupplyCurrent().getValue();
     }
 
     @Override
-    protected double getFeederCurrent() {
-        return feederMotor.getSupplyCurrent().getValueAsDouble();
+    protected Current getFeederCurrent() {
+        return feederMotor.getSupplyCurrent().getValue();
     }
 
     @Override
-    protected void setHopperVolt(double volt) {
-        hopperMotor.setVoltage(volt);
+    public void setHopperVolt(Voltage volt) {
+        hopperMotor.setVoltage(volt.in(Units.Volts));
     }
 
     @Override
-    protected void setFeederVolt(double volt) {
-        feederMotor.setVoltage(volt);
+    public void setFeederVolt(Voltage volt) {
+        feederMotor.setVoltage(volt.in(Units.Volts));
     }
 }
