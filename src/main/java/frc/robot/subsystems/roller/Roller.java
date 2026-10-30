@@ -18,7 +18,7 @@ public class Roller extends SubsystemBase {
     private RollerIO io = Robot.isReal() ? new RollerIOTalon(logFieldsTable) 
                                          : new RollerIOSim(logFieldsTable);
     
-
+    
     public Roller(){}
 
     @Override
@@ -40,11 +40,7 @@ public class Roller extends SubsystemBase {
         io.setVoltage(voltage);
     }
 
-    public Current getSupplyCurrent() {
-        return io.supplyCurrent.get();
-    }
-
-    public Current getTorqueCurrent() {
-        return io.torqueCurrent.get();
+    public Current getCurrent() {
+        return io.current.get();
     }
 }

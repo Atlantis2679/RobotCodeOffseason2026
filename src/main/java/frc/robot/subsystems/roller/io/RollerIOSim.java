@@ -13,12 +13,7 @@ public class RollerIOSim extends RollerIO{
     public void setVoltage(Voltage voltage){}
 
     @Override
-    protected Current getTorqueCurrent(){
-        return Amps.of(0);
-    }
-
-    @Override
-    protected Current getSupplyCurrent(){
+    protected Current getCurrent(){
         return Amps.of(0);
     }
 }

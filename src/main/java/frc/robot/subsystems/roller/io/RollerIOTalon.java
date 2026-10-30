@@ -20,8 +20,8 @@ public class RollerIOTalon extends RollerIO{
     public RollerIOTalon(LogFieldsTable logFieldsTable){
         super(logFieldsTable);
         TalonFXConfiguration talonFXConfiguration = new TalonFXConfiguration();
-        talonFXConfiguration.CurrentLimits.SupplyCurrentLimitEnable = true;
-        talonFXConfiguration.CurrentLimits.SupplyCurrentLimit = SUPPLY_CURRENT_LIMIT;
+        talonFXConfiguration.CurrentLimits.StatorCurrentLimitEnable = true;
+        talonFXConfiguration.CurrentLimits.StatorCurrentLimit = CURRENT_LIMIT;
         statusCode = motor.getConfigurator().apply(talonFXConfiguration);
         AlertsFactory.phoenixError(
             new PeriodicAlertsGroup("Roller"),
@@ -35,12 +35,7 @@ public class RollerIOTalon extends RollerIO{
     }
 
     @Override
-    protected Current getSupplyCurrent() {
-        return motor.getSupplyCurrent().getValue();
-    }
-
-    @Override
-    protected Current getTorqueCurrent() {
+    protected Current getCurrent() {
         return motor.getTorqueCurrent().getValue();
     }
 
