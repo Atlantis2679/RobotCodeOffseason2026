@@ -29,4 +29,22 @@ public final class RobotMap {
     public static final int DRIVER_PORT = 0;
     public static final int OPERATOR_PORT = 1;
   }
+
+  public static final class CANBUS {
+    public static final int ROLLER_ID = 0;
+
+    public static final int FOURBAR_ID = 0;
+
+    public static final int FLYWHEEL1_ID = 0;
+    public static final int FLYWHEEL2_ID = 0;
+    public static final int FLYWHEEL3_ID = 0;
+    public static final int FLYWHEEL4_ID = 0;
+
+    public static final int HOOD_ID = 0;
+
+    public static final int HOPPER_ID = 0;
+    public static final int FEEDER_ID = 0;
+
+    public static final int CANANDGYRO_ID = 0;
+  }
 }
