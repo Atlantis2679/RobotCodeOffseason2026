@@ -47,4 +47,8 @@ public final class RobotMap {
 
     public static final int CANANDGYRO_ID = 0;
   }
+
+  public static final class DIO {
+    public static final int SLAPTAKE_ENCODER_ID = 0;
+  }
 }
