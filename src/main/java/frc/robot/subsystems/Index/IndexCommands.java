@@ -1,5 +1,7 @@
 package frc.robot.subsystems.index;
 
+import static frc.robot.subsystems.index.IndexConstants.*;
+
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
@@ -20,24 +22,23 @@ public class IndexCommands {
         return index.run(() -> {
             index.setFeederVolt(feederVolt.get());
             index.setHopperVolt(feederVolt.get());  
-        }).finallyDo(index::stop)
-        .withName("Index spin both motors");
+        }).finallyDo(index::stop).withName("Index spin both motors");
     }
 
-    public Command spinBoth(Voltage feederVolt, Voltage hopperVolt){
+    public Command spinBoth(Voltage feederVolt, Voltage hopperVolt) {
         return spinBoth(() -> feederVolt, () -> hopperVolt);
     }
 
-    public Command stopBoth(){
+    public Command stopBoth() {
         return spinBoth(Units.Volts.zero(), Units.Volts.zero());
     }
 
     public Command manualController(DoubleSupplier speed){
-        return spinBoth(() -> Units.Volts.of(speed.getAsDouble()*IndexConstants.MAX_FEEDER_VOLT),
-                        () -> Units.Volts.of(speed.getAsDouble()*IndexConstants.MAX_HOPPER_VOLT));
+        return spinBoth(() -> MAX_FEEDER_VOLT.times(speed.getAsDouble()),
+                        () -> MAX_HOPPER_VOLT.times(speed.getAsDouble()));
     }
 
-    public TunableCommand tunableSetVoltage(){
+    public TunableCommand tunableSetVoltage() {
         return TunableCommand.wrap((tunablesTable) -> {
             DoubleHolder voltageFeeder = tunablesTable.addNumber("FeederVolt", 0.0);
             DoubleHolder voltageHopper = tunablesTable.addNumber("HopperVolt", 0.0);
