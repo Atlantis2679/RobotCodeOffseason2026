@@ -1,7 +1,9 @@
 package frc.robot.subsystems.swerve;
 
 import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -16,12 +18,11 @@ import frc.robot.RobotMap.ModuleFL;
 import frc.robot.RobotMap.ModuleFR;
 import frc.robot.RobotMap.ModuleBL;
 import frc.robot.RobotMap.ModuleBR;
-import frc.robot.subsystems.poseestimation.CollisionDetector.CollisionDetectorInfo;
 import frc.robot.subsystems.poseestimation.PoseEstimator;
-import frc.robot.subsystems.poseestimation.PoseEstimator.OdometryMeasurment;
+import frc.robot.subsystems.poseestimation.PoseEstimator.OdometryMeasurement;
 import frc.robot.subsystems.swerve.SwerveConstants.Modules;
 import frc.robot.subsystems.swerve.io.ImuIO;
-import frc.robot.subsystems.swerve.io.ImuIONavX;
+import frc.robot.subsystems.swerve.io.ImuIORedux;
 import frc.robot.subsystems.swerve.io.ImuIOSim;
 import team2679.atlantiskit.helpers.RotationalSensorHelper;
 import team2679.atlantiskit.logfields.LogFieldsTable;
@@ -31,6 +32,7 @@ import team2679.atlantiskit.tunables.TunableBuilder;
 import team2679.atlantiskit.tunables.TunablesManager;
 import team2679.atlantiskit.valueholders.DoubleHolder;
 
+import static edu.wpi.first.units.Units.Seconds;
 import static frc.robot.subsystems.swerve.SwerveConstants.*;
 
 import java.util.Optional;
@@ -49,21 +51,19 @@ public class Swerve extends SubsystemBase implements Tunable {
 
   private final RotationalSensorHelper gyroYawDegreesCCW;
 
-  private final ImuIO imuIO = Robot.isReal() ? new ImuIONavX(fieldsTable) : new ImuIOSim(fieldsTable);
+  private final ImuIO imuIO = Robot.isReal() ? new ImuIORedux(fieldsTable) : new ImuIOSim(fieldsTable);
 
-  private final Debouncer isGyroConnectedDebouncer = new Debouncer(GYRO_CONNECTED_DEBUNCER_SECONDS);
+  private final Debouncer isGyroConnectedDebouncer = new Debouncer(GYRO_CONNECTED_DEBUNCER_SECONDS, DebounceType.kRising);
 
   public Swerve() {
     fieldsTable.update();
 
     TunablesManager.add("Swerve", (Tunable) this);
 
-    gyroYawDegreesCCW = new RotationalSensorHelper(imuIO.angleDegreesCCW.getAsDouble());
+    gyroYawDegreesCCW = new RotationalSensorHelper(imuIO.yawAngleDeg.getAsDouble());
     gyroYawDegreesCCW.enableContinuousWrap(0, 360);
 
     PeriodicAlertsGroup.defaultInstance.addErrorAlert(() -> "Gyro Disconnected!", () -> !isGyroConnected());
-
-    resetGyroYawZero();
   }
 
   @Override
@@ -72,14 +72,19 @@ public class Swerve extends SubsystemBase implements Tunable {
       module.periodic();
     }
 
-    gyroYawDegreesCCW.update(imuIO.angleDegreesCCW.getAsDouble());
+    gyroYawDegreesCCW.update(imuIO.yawAngleDeg.getAsDouble());
 
     Optional<Rotation2d> gyroAngle = isGyroConnected() ? Optional.of(Rotation2d.fromDegrees(getGyroYawDegreesCCW()))
         : Optional.empty();
-    PoseEstimator.getInstance().updateCollision(
-        new CollisionDetectorInfo(getXAcceleration(), getYAcceleration(), getZAcceleration(), getModulesCurrents()));
-    PoseEstimator.getInstance().addOdometryMeasurment(
-        new OdometryMeasurment(kinematics, getModulePositions(), gyroAngle, Timer.getFPGATimestamp()));
+    PoseEstimator.getInstance().addOdometryMeasurement(
+        new OdometryMeasurement(
+          Seconds.of(Timer.getTimestamp()),
+          kinematics,
+          getModulePositionsDelta(),
+          getModulesStates(),
+          new Translation2d(imuIO.xAcceleration.getAsDouble(), imuIO.yAcceleration.getAsDouble()),
+          gyroAngle
+    ));
 
     fieldsTable.recordOutput("Is gryo connected", isGyroConnected());
     fieldsTable.recordOutput("Robot Relative Real Chassis Speeds", getRobotRelativeChassisSpeeds());
@@ -107,39 +112,6 @@ public class Swerve extends SubsystemBase implements Tunable {
     drive(0, 0, 0, false, true);
   }
 
-  public double getGyroYawDegreesCCW() {
-    return gyroYawDegreesCCW.getAngle();
-  }
-
-  public SwerveModulePosition[] getModulePositions() {
-    SwerveModulePosition[] positions = new SwerveModulePosition[modules.length];
-    for (int i = 0; i < modules.length; i++) {
-      positions[i] = modules[i].getModulePosition();
-    }
-    return positions;
-  }
-
-  public ChassisSpeeds getRobotRelativeChassisSpeeds() {
-    return kinematics.toChassisSpeeds(
-        modules[0].getModuleState(),
-        modules[1].getModuleState(),
-        modules[2].getModuleState(),
-        modules[3].getModuleState());
-  }
-
-  public SwerveModuleState[] getModulesStates() {
-    return new SwerveModuleState[] {
-      modules[0].getModuleState(),
-      modules[1].getModuleState(),
-      modules[2].getModuleState(),
-      modules[3].getModuleState()
-    };
-  }
-
-  public boolean isGyroConnected() {
-    return isGyroConnectedDebouncer.calculate(imuIO.isConnected.getAsBoolean());
-  }
-
   public void driveChassisSpeeds(ChassisSpeeds speeds, boolean useVoltage) {
     fieldsTable.recordOutput("Modules Target Chassis Speeds", speeds);
 
@@ -148,14 +120,6 @@ public class Swerve extends SubsystemBase implements Tunable {
     SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, Modules.MAX_SPEED_MPS);
 
     setModulesState(swerveModuleStates, true, true, useVoltage);
-  }
-
-  public void resetGyroYaw(double newAngleDegreesCCW) {
-    gyroYawDegreesCCW.resetAngle(newAngleDegreesCCW);
-  }
-
-  public void resetGyroYawZero() {
-    resetGyroYaw(RobotContainer.isRedAlliance() ? 0 : 180);
   }
 
   public void resetModulesToAbsoulte() {
@@ -171,10 +135,58 @@ public class Swerve extends SubsystemBase implements Tunable {
       module.setTargetState(moduleStates[module.getModuleNumber()], optimize, preventJittering, useVoltage);
   }
 
-  public void costAll() {
+  public void setGyroOffset(double newGyroOffsetCCW) {
+  }
+
+  public void coastAll() {
     for (SwerveModule module : modules) {
       module.setCoast();
     }
+  }
+
+  public double getGyroYawDegreesCCW() {
+    return gyroYawDegreesCCW.getAngle();
+  }
+
+  public SwerveModulePosition[] getModulePositions() {
+    SwerveModulePosition[] positions = new SwerveModulePosition[modules.length];
+    for (int i = 0; i < modules.length; i++) {
+      positions[i] = modules[i].getModulePosition();
+    }
+    return positions;
+  }
+
+  public SwerveModulePosition[] getModulePositionsDelta() {
+    SwerveModulePosition[] positions = new SwerveModulePosition[modules.length];
+    for (int i = 0; i < modules.length; i++) {
+      positions[i] = modules[i].getModulePositionDelta();
+    }
+    return positions;
+  }
+
+  public ChassisSpeeds getRobotRelativeChassisSpeeds() {
+    return kinematics.toChassisSpeeds(
+        modules[0].getModuleState(),
+        modules[1].getModuleState(),
+        modules[2].getModuleState(),
+        modules[3].getModuleState());
+  }
+
+  public ChassisSpeeds getFieldRelativeChassisSpeeds() {
+    return ChassisSpeeds.fromRobotRelativeSpeeds(getRobotRelativeChassisSpeeds(), PoseEstimator.getInstance().getEstimatedPose().getRotation());
+  }
+  
+  public SwerveModuleState[] getModulesStates() {
+    return new SwerveModuleState[] {
+      modules[0].getModuleState(),
+      modules[1].getModuleState(),
+      modules[2].getModuleState(),
+      modules[3].getModuleState()
+    };
+  }
+
+  public boolean isGyroConnected() {
+    return isGyroConnectedDebouncer.calculate(imuIO.isConnected.getAsBoolean());
   }
 
   public double getXAcceleration() {
@@ -187,6 +199,14 @@ public class Swerve extends SubsystemBase implements Tunable {
 
   public double getZAcceleration() {
     return imuIO.zAcceleration.getAsDouble();
+  }
+
+  public double getRobotPitchDeg() {
+    return imuIO.pitchAngleDeg.getAsDouble();
+  }
+
+  public double getRobotRollDeg() {
+    return imuIO.rollAngleDeg.getAsDouble();
   }
 
   public double[] getModulesCurrents() {

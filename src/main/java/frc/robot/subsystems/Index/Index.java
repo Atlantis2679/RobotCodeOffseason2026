@@ -1,4 +1,4 @@
-package frc.robot.subsystems.Index;
+package frc.robot.subsystems.index;
 
 import static edu.wpi.first.units.Units.Volts;
 
@@ -8,9 +8,9 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
-import frc.robot.subsystems.Index.io.IndexIO;
-import frc.robot.subsystems.Index.io.IndexIOSim;
-import frc.robot.subsystems.Index.io.IndexIOTalon;
+import frc.robot.subsystems.index.io.IndexIO;
+import frc.robot.subsystems.index.io.IndexIOSim;
+import frc.robot.subsystems.index.io.IndexIOTalon;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 
 public class Index extends SubsystemBase{

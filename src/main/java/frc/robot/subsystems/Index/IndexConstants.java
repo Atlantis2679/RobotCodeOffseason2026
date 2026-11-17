@@ -1,4 +1,4 @@
-package frc.robot.subsystems.Index;
+package frc.robot.subsystems.index;
 
 public final class IndexConstants {
     public static final double MAX_FEEDER_VOLT = 12;

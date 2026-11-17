@@ -1,4 +1,4 @@
-package frc.robot.subsystems.Index.io;
+package frc.robot.subsystems.index.io;
 
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Current;

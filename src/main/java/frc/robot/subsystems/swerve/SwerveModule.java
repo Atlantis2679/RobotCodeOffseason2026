@@ -8,7 +8,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import frc.robot.Robot;
 import frc.robot.subsystems.swerve.io.SwerveModuleIO;
-import frc.robot.subsystems.swerve.io.SwerveModuleIOFalcon;
+import frc.robot.subsystems.swerve.io.SwerveModuleIOTalonFX;
 import frc.robot.subsystems.swerve.io.SwerveModuleSim;
 import team2679.atlantiskit.helpers.RotationalSensorHelper;
 import team2679.atlantiskit.logfields.LogFieldsTable;
@@ -29,7 +29,7 @@ public class SwerveModule implements Tunable {
     public SwerveModule(LogFieldsTable swerveFieldsTable, int moudleNum, int driveMotorID, int turnMotorID,
             int canCoderID) {
         fieldsTable = swerveFieldsTable.getSubTable("Module " + moudleNum + " " + getModuleName(moudleNum));
-        io = Robot.isReal() ? new SwerveModuleIOFalcon(fieldsTable, moudleNum, driveMotorID, turnMotorID, canCoderID)
+        io = Robot.isReal() ? new SwerveModuleIOTalonFX(fieldsTable, moudleNum, driveMotorID, turnMotorID, canCoderID)
                 : new SwerveModuleSim(fieldsTable);
 
         fieldsTable.update();
@@ -59,7 +59,7 @@ public class SwerveModule implements Tunable {
     public void setTargetState(SwerveModuleState targetState, boolean optimize, boolean preventJittering,
             boolean useVoltage) {
         if (preventJittering
-                && Math.abs(targetState.speedMetersPerSecond) < MAX_SPEED_MPS * PREVENT_JITTERING_MULTIPLAYER) {
+                && Math.abs(targetState.speedMetersPerSecond) < MAX_SPEED_MPS * PREVENT_JITTERING_MULTIPLIER) {
             io.setDrivePercentageSpeed(0);
             return;
         }
@@ -116,7 +116,6 @@ public class SwerveModule implements Tunable {
     public void resetIntegratedAngleToAbsolute() {
         currentAngleDegreesCCW = getAbsoluteDegreesCCW();
         io.resetIntegratedAngleRotations(currentAngleDegreesCCW / 360);
-        io.setTurnAngleRotations(currentAngleDegreesCCW / 360);
     }
 
     public void resetAngleDegreesCCW(double newAngle) {
