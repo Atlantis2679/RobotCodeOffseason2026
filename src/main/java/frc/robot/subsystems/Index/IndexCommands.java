@@ -1,15 +1,11 @@
-package frc.robot.subsystems.Index;
+package frc.robot.subsystems.index;
 
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
-import com.ctre.phoenix6.configs.VoltageConfigs;
-
-import edu.wpi.first.units.Unit;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj2.command.Command;
-import team2679.atlantiskit.tunables.TunablesManager;
 import team2679.atlantiskit.tunables.extensions.TunableCommand;
 import team2679.atlantiskit.valueholders.DoubleHolder;
 
@@ -18,7 +14,6 @@ public class IndexCommands {
 
     public IndexCommands(Index index){
         this.index = index;
-        //tuneables maneger
     }
 
     public Command spinBoth(Supplier<Voltage> feederVolt, Supplier<Voltage> hopperVolt){

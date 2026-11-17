@@ -1,18 +1,17 @@
-package frc.robot.subsystems.Index.io;
+package frc.robot.subsystems.index.io;
 
 import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
-import edu.wpi.first.wpilibj.motorcontrol.Talon;
 import frc.robot.RobotMap;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 
 
 public class IndexIOTalon extends IndexIO{
-    private TalonFX feederMotor = new TalonFX(RobotMap.CANBUS.FEEDER_MOTOR);    
-    private TalonFX hopperMotor = new TalonFX(RobotMap.CANBUT.HOPPER_MOTOR);
+    private TalonFX feederMotor = new TalonFX(RobotMap.CANBUS.FEEDER_ID);    
+    private TalonFX hopperMotor = new TalonFX(RobotMap.CANBUS.HOPPER_ID);
     
     public IndexIOTalon(LogFieldsTable fieldsTable){
         super(fieldsTable);
