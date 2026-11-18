@@ -7,6 +7,7 @@ import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Unit;
 import team2679.atlantiskit.tunables.Tunable;
 import team2679.atlantiskit.tunables.TunableBuilder;
+import team2679.atlantiskit.valueholders.ValueHolder;
 
 public class MathUtils {
     public static class CosineWaveFollower implements Tunable {
@@ -42,18 +43,15 @@ public class MathUtils {
         }
     }
 
-    public static final class Bounds<M extends Measure<?>> implements Tunable {
-        public final TunableMeasure<M> lowerBound;
-        public final TunableMeasure<M> upperBound;
+    public static final class Bounds<U extends Unit, M extends Measure<U>> implements Tunable {
+        private final U unit;
+        private final ValueHolder<M> lowerBound;
+        private final ValueHolder<M> upperBound;
 
-        public Bounds(TunableMeasure<M> lowerBound, TunableMeasure<M> upperBound) {
-            this.lowerBound = lowerBound;
-            this.upperBound = upperBound;
-        }
-
-        public static <U extends Unit, M extends Measure<U>> Bounds<M> of(M lower, M upper) {
-            U unit = lower.unit();
-            return new Bounds<>(new TunableMeasure<M>(lower, unit), new TunableMeasure<M>(upper, unit));
+        public Bounds(M lower, M upper) {
+            unit = lower.unit();
+            lowerBound = new ValueHolder<M>(lower);
+            upperBound = new ValueHolder<M>(upper);
         }
 
         public M clamp(M value) {
@@ -77,10 +75,11 @@ public class MathUtils {
             return (M) value.unit().ofBaseUnits(wrapped);
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public void initTunable(TunableBuilder builder) {
-            builder.addChild("lowerBound", lowerBound.tunable());
-            builder.addChild("upperBound", upperBound.tunable());
+            builder.addDoubleProperty("lowerBound", () -> lowerBound.get().in(unit), (value) -> lowerBound.set((M) unit.of(value)));
+            builder.addDoubleProperty("upperBound", () -> upperBound.get().in(unit), (value) -> upperBound.set((M) unit.of(value)));
         }
     }
 

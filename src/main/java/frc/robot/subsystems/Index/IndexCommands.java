@@ -33,9 +33,10 @@ public class IndexCommands {
         return spinBoth(Units.Volts.zero(), Units.Volts.zero());
     }
 
-    public Command manualController(DoubleSupplier speed){
-        return spinBoth(() -> MAX_FEEDER_VOLT.times(speed.getAsDouble()),
-                        () -> MAX_HOPPER_VOLT.times(speed.getAsDouble()));
+    public Command manualController(DoubleSupplier feederSpeed, DoubleSupplier hopperSpeed){
+        return spinBoth(() -> MAX_FEEDER_VOLT.times(feederSpeed.getAsDouble()),
+                        () -> MAX_HOPPER_VOLT.times(hopperSpeed.getAsDouble()))
+                .withName("manual index controller");
     }
 
     public TunableCommand tunableSetVoltage() {
