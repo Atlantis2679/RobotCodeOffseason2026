@@ -12,15 +12,13 @@ public abstract class IndexIO extends IOBase{
     public Supplier<Current> hopperCurrent = fields.addMeasure("hopperCurrent", this::getHopperCurrent, Units.Amps.zero());
     public Supplier<Current> feederCurrent = fields.addMeasure("feederCurrent", this::getFeederCurrent, Units.Amps.zero());
 
-    public IndexIO(LogFieldsTable fieldsTable){
-        super (fieldsTable);
+    public IndexIO(LogFieldsTable fieldsTable) {
+        super(fieldsTable);
     }
-    
 
     protected abstract Current getHopperCurrent();
     protected abstract Current getFeederCurrent();
 
     public abstract void setHopperVolt(Voltage volt);
     public abstract void setFeederVolt(Voltage volt);
-
 }

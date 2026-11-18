@@ -2,7 +2,7 @@ package frc.robot.subsystems.roller;
 
 import static edu.wpi.first.units.Units.*;
 
-import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.units.VoltageUnit;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -10,33 +10,30 @@ import frc.robot.Robot;
 import frc.robot.subsystems.roller.io.RollerIO;
 import frc.robot.subsystems.roller.io.RollerIOSim;
 import frc.robot.subsystems.roller.io.RollerIOTalon;
+import frc.robot.utils.MathUtils.Bounds;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 import static frc.robot.subsystems.roller.RollerConstants.*;
 
 public class Roller extends SubsystemBase {
-    private LogFieldsTable logFieldsTable = new LogFieldsTable("Rolelr");
-    private RollerIO io = Robot.isReal() ? new RollerIOTalon(logFieldsTable) 
-                                         : new RollerIOSim(logFieldsTable);
-    
-    
-    public Roller(){}
+    private final LogFieldsTable logFieldsTable = new LogFieldsTable("Rolelr");
+    private final RollerIO io = Robot.isReal() ? new RollerIOTalon(logFieldsTable) : new RollerIOSim(logFieldsTable);
+
+    private final Bounds<VoltageUnit, Voltage> rollerVoltageBounds = new Bounds<>(MAX_VOLTAGE.unaryMinus(), MAX_VOLTAGE);
+
+    public Roller() {}
 
     @Override
     public void periodic() {
-        logFieldsTable.update();
-        logFieldsTable.recordOutput("current command", 
-            this.getCurrentCommand() != null ? 
-            this.getCurrentCommand().getName() :
-            "none");
+        logFieldsTable.recordOutput("Current command: ",
+            getCurrentCommand() != null? getCurrentCommand().getName() : "None");
     }
 
     public void stop() {
-        io.setVoltage(Volts.of(0));
+        setVoltage(Volts.zero());;
     }
 
     public void setVoltage(Voltage voltage) {
-        voltage = Volts.of(
-            MathUtil.clamp(voltage.baseUnitMagnitude(), MIN_VOLTAGE, MAX_VOLTAGE));
+        voltage = rollerVoltageBounds.clamp(voltage);
         io.setVoltage(voltage);
     }
 

@@ -1,6 +1,5 @@
 package frc.robot.subsystems.roller;
 
-import static edu.wpi.first.units.Units.Volts;
 import static frc.robot.subsystems.roller.RollerConstants.*;
 
 import java.util.function.DoubleSupplier;
@@ -16,19 +15,18 @@ public class RollerCommands {
     }
 
     public Command stop() {
-        return roller.run(roller::stop);
-    }
-
-    public Command setVoltage(Voltage volt) {
-        return roller.run(() -> roller.setVoltage(volt));
+        return roller.run(roller::stop).withName("stop roller");
     }
 
     public Command setVoltage(Supplier<Voltage> volt) {
-        return roller.run(() -> roller.setVoltage(volt.get()));
+        return roller.run(() -> roller.setVoltage(volt.get())).withName("set roller voltage");
     }
 
-    public Command manualController(DoubleSupplier supplier) {
-        return roller.run(() -> roller.setVoltage(
-            Volts.of(MAX_VOLTAGE*supplier.getAsDouble())));
+    public Command setVoltage(Voltage volt) {
+        return setVoltage(() -> volt);
+    }
+
+    public Command manualController(DoubleSupplier speed) {
+        return setVoltage(() -> MAX_VOLTAGE.times(speed.getAsDouble())).withName("manual roller controller");
     }
 }

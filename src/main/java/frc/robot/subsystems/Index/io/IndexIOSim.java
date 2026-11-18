@@ -5,8 +5,7 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 
-public class IndexIOSim extends IndexIO{
-
+public class IndexIOSim extends IndexIO {
     public IndexIOSim(LogFieldsTable fieldsTable){
         super(fieldsTable);
     }

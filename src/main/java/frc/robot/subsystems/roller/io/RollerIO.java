@@ -9,9 +9,7 @@ import team2679.atlantiskit.logfields.IOBase;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 
 public abstract class RollerIO extends IOBase{
-
-    public Supplier<Current> current = fields.addMeasure("current", 
-        this::getCurrent, Amps.of(0));
+    public Supplier<Current> current = fields.addMeasure("current", this::getCurrent, Amps.of(0));
 
     public RollerIO(LogFieldsTable fields){
         super(fields);
