@@ -10,10 +10,10 @@ import team2679.atlantiskit.logfields.IOBase;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 
 public abstract class SlaptakeIO extends IOBase{
-    public Supplier<Current> current = fields.addMeasure("Torque current", 
-        this::getCurrent, Units.Amps.of(0));
-    public Supplier<Angle> angle = fields.addMeasure("Angle", 
-        this::getAngle, Units.Degrees.of(0));
+    public Supplier<Current> current = fields.addMeasure("current", 
+        this::getCurrent, Units.Amps.zero());
+    public Supplier<Angle> angle = fields.addMeasure("angle", 
+        this::getAngle, Units.Degrees.zero());
 
     public SlaptakeIO(LogFieldsTable logFieldsTable) {
         super(logFieldsTable);
@@ -23,4 +23,5 @@ public abstract class SlaptakeIO extends IOBase{
     protected abstract Angle getAngle();
 
     public abstract void setVoltage(Voltage voltage);
+    public abstract void setCoast(boolean coast);
 }

@@ -24,6 +24,6 @@ public class SlaptakeIOSim extends SlaptakeIO {
 
     public void setVoltage(Voltage voltage) {}
 
-
-
+    @Override
+    public void setCoast(boolean coast) {}
 }
